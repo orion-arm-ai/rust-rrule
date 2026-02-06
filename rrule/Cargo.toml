@@ -43,3 +43,7 @@ serde = ["serde_with", "chrono/serde", "chrono-tz/serde"]
 
 # Allows EXRULE's to be used in the `RRuleSet`.
 exrule = []
+
+# When a datetime is ambiguous due to daylight saving time transitions,
+# pick the first (earliest) occurrence instead of returning an error.
+dst-fold-first = []

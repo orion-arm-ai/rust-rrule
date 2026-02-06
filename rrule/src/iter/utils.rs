@@ -77,8 +77,11 @@ pub(crate) fn add_time_to_date(
     date: NaiveDate,
     time: NaiveTime,
 ) -> Option<chrono::DateTime<Tz>> {
-    if let Some(dt) = date.and_time(time).and_local_timezone(tz).single() {
-        return Some(dt);
+    match date.and_time(time).and_local_timezone(tz) {
+        chrono::offset::LocalResult::Single(dt) => return Some(dt),
+        #[cfg(feature = "dst-fold-first")]
+        chrono::offset::LocalResult::Ambiguous(dt, _) => return Some(dt),
+        _ => {}
     }
     // If the day is a daylight saving time, the above code might not work, and we
     // can try to get a valid datetime by adding the `time` as a duration instead.

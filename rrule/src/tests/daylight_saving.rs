@@ -1,4 +1,83 @@
+use crate::ParseError;
 use crate::{tests::common::check_occurrences, RRuleSet};
+
+/// Test that without `dst-fold-first` feature, ambiguous DST times return an error.
+/// America/Mexico_City 2021 DST fall back:
+/// - 2021-10-31 01:30 occurs twice due to DST fall back
+/// - Without the feature, parsing should fail with ambiguous error
+#[test]
+#[cfg(not(feature = "dst-fold-first"))]
+fn dst_ambiguous_time_returns_error() {
+    // 2021-10-31 01:30 is ambiguous (DST fall back)
+    let result: Result<RRuleSet, _> =
+        "DTSTART;TZID=America/Mexico_City:20211031T013000\nRRULE:FREQ=YEARLY;COUNT=1".parse();
+
+    // Without dst-fold-first feature, parsing should fail
+    assert!(result.is_err());
+    let err = result.unwrap_err();
+    let err_str = format!("{}", err);
+    assert!(
+        err_str.contains("ambiguous"),
+        "Expected ambiguous error, got: {}",
+        err_str
+    );
+}
+
+/// Test that the `dst-fold-first` feature correctly handles ambiguous DST times
+/// by selecting the first (earlier) occurrence.
+///
+/// America/Mexico_City 2021 DST fall back:
+/// - Clocks go back on 2021-10-31 at 03:00 -> 02:00
+/// - 01:30 occurs twice: first at -05:00 (CDT), then at -06:00 (CST)
+/// - Without the feature, this should error due to ambiguity
+/// - With `dst-fold-first` feature, it should pick the first occurrence (CDT, -05:00)
+#[test]
+#[cfg(feature = "dst-fold-first")]
+fn dst_fold_first_picks_earlier_time() {
+    // 2021-10-31 01:30 occurs twice due to DST fall back
+    // First occurrence: 01:30-05:00 (CDT)
+    // Second occurrence: 01:30-06:00 (CST)
+    // With dst-fold-first, should pick the first (earlier) one
+    let rrule: RRuleSet =
+        "DTSTART;TZID=America/Mexico_City:20211031T013000\nRRULE:FREQ=YEARLY;COUNT=2"
+            .parse()
+            .unwrap();
+
+    let dates = rrule.all_unchecked();
+
+    // With dst-fold-first, we should get the first occurrence (CDT, -05:00)
+    check_occurrences(
+        &dates,
+        &[
+            "2021-10-31T01:30:00-05:00", // First occurrence (CDT, before fall back)
+            "2022-10-31T01:30:00-06:00", // Mexico eliminated DST in 2022, so -06:00
+        ],
+    );
+}
+
+/// Test that the Mexico City DST transition works with yearly recurrence
+/// Note: Mexico eliminated DST after 2022, so times after 2022 should be in CST (-06:00)
+#[test]
+#[cfg(feature = "dst-fold-first")]
+fn dst_fold_first_mexico_city_yearly() {
+    // Start on 2021-10-31 01:30 which is ambiguous (DST fall back)
+    let rrule: RRuleSet =
+        "DTSTART;TZID=America/Mexico_City:20211031T013000\nRRULE:FREQ=YEARLY;COUNT=4"
+            .parse()
+            .unwrap();
+
+    let dates = rrule.all_unchecked();
+
+    check_occurrences(
+        &dates,
+        &[
+            "2021-10-31T01:30:00-05:00", // DST active (CDT)
+            "2022-10-31T01:30:00-06:00", // No DST (CST) - Mexico eliminated DST
+            "2023-10-31T01:30:00-06:00", // No DST (CST)
+            "2024-10-31T01:30:00-06:00", // No DST (CST)
+        ],
+    );
+}
 
 #[test]
 fn daylight_savings_1() {
