@@ -623,8 +623,8 @@ mod tests {
 
         let tests = [
             t(Tz::UTC, Tz::LOCAL),
-            t(Tz::Europe__Berlin, Tz::LOCAL),
-            t(Tz::LOCAL, Tz::Europe__Berlin),
+            t("Europe/Berlin".parse::<Tz>().unwrap(), Tz::LOCAL),
+            t(Tz::LOCAL, "Europe/Berlin".parse::<Tz>().unwrap()),
         ];
 
         for (start_date, until) in tests {

@@ -1,6 +1,9 @@
 use chrono::{FixedOffset, Local, Offset, TimeZone, Utc};
 
-use super::Tz;
+use std::str::FromStr;
+
+use super::{IanaOffset, IanaTz, Tz};
+use crate::ParseError;
 
 impl PartialEq for Tz {
     fn eq(&self, other: &Self) -> bool {
@@ -20,13 +23,24 @@ impl From<Local> for Tz {
 
 impl From<Utc> for Tz {
     fn from(_tz: Utc) -> Self {
-        Self::Tz(chrono_tz::UTC)
+        Self::UTC
     }
 }
 
-impl From<chrono_tz::Tz> for Tz {
-    fn from(tz: chrono_tz::Tz) -> Self {
+impl From<IanaTz> for Tz {
+    fn from(tz: IanaTz) -> Self {
         Self::Tz(tz)
+    }
+}
+
+impl FromStr for Tz {
+    type Err = ParseError;
+
+    /// Parses an IANA timezone name (case-sensitive), e.g. `Europe/Berlin`.
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        IanaTz::get(s)
+            .map(Self::Tz)
+            .ok_or_else(|| ParseError::InvalidTimezone(s.into()))
     }
 }
 
@@ -51,7 +65,7 @@ impl std::fmt::Display for Tz {
 #[derive(Clone, Copy)]
 pub enum RRuleOffset {
     Local(FixedOffset),
-    Tz(<chrono_tz::Tz as TimeZone>::Offset),
+    Tz(IanaOffset),
 }
 
 impl std::fmt::Debug for RRuleOffset {
@@ -87,7 +101,7 @@ impl TimeZone for Tz {
     fn from_offset(offset: &Self::Offset) -> Self {
         match offset {
             RRuleOffset::Local(offset) => Self::Local(Local::from_offset(offset)),
-            RRuleOffset::Tz(offset) => Self::Tz(chrono_tz::Tz::from_offset(offset)),
+            RRuleOffset::Tz(offset) => Self::Tz(IanaTz::from_offset(offset)),
         }
     }
 

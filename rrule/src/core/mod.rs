@@ -1,4 +1,5 @@
 mod datetime;
+mod iana_tz;
 mod rrule;
 mod rruleset;
 mod timezone;
@@ -10,6 +11,7 @@ pub use self::rruleset::{RRuleResult, RRuleSet};
 pub(crate) use datetime::{
     duration_from_midnight, get_day, get_hour, get_minute, get_month, get_second,
 };
+pub use iana_tz::{tzdb_version, IanaOffset, IanaTz, UnknownTimeZone};
 pub use timezone::Tz;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]

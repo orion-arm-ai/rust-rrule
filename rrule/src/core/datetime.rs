@@ -1,4 +1,4 @@
-use super::timezone::Tz;
+use super::{timezone::Tz, IanaTz};
 use chrono::{Datelike, Duration, NaiveTime, Timelike};
 
 pub(crate) fn duration_from_midnight(time: NaiveTime) -> Duration {
@@ -36,14 +36,13 @@ pub(crate) fn datetime_to_ical_format(dt: &chrono::DateTime<Tz>) -> String {
     let tz = dt.timezone();
     match tz {
         Tz::Local(_) => {}
-        Tz::Tz(tz) => match tz {
-            chrono_tz::UTC => {
+        Tz::Tz(tz) => {
+            if tz == IanaTz::UTC {
                 tz_postfix = "Z".to_string();
-            }
-            tz => {
+            } else {
                 tz_prefix = format!(";TZID={}", tz.name());
             }
-        },
+        }
     }
 
     let dt = dt.format("%Y%m%dT%H%M%S");
