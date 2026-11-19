@@ -14,7 +14,10 @@ edition.workspace = true
 
 [dependencies]
 chrono = "0.4.39"
-chrono-tz = "0.10.1"
+# IANA tz rules come from jiff's bundled database (never the OS copy), so all
+# platforms agree. Bump `jiff-tzdb` to pick up new tzdata releases.
+jiff = { version = "1.0.1", default-features = false, features = ["std", "tzdb-bundle-always"] }
+jiff-tzdb = "1.0.0"
 log = "0.4.25"
 regex = { version = "1.11.1", default-features = false, features = ["perf", "std"] }
 clap = { version = "4.5.26", optional = true, features = ["derive"] }
@@ -39,7 +42,7 @@ by-easter = []
 cli-tool = ["clap"]
 
 # Enable serde for some of the public structs.
-serde = ["serde_with", "chrono/serde", "chrono-tz/serde"]
+serde = ["serde_with", "chrono/serde"]
 
 # Allows EXRULE's to be used in the `RRuleSet`.
 exrule = []

@@ -83,7 +83,9 @@ mod test {
     use crate::{core::Tz, parser::content_line::ContentLine, Frequency, NWeekday, RRule};
 
     const UTC: Tz = Tz::UTC;
-    const BERLIN: Tz = Tz::Europe__Berlin;
+    fn berlin() -> Tz {
+        "Europe/Berlin".parse().unwrap()
+    }
 
     #[test]
     fn parses_valid_input_to_grammar() {
@@ -121,8 +123,8 @@ mod test {
             ..Default::default()
         }),
         ContentLine::ExDate(vec![
-            BERLIN.with_ymd_and_hms(2012, 2, 2,13, 0, 0).unwrap(),
-            BERLIN.with_ymd_and_hms(2012, 2, 3,13, 0, 0).unwrap(),
+            berlin().with_ymd_and_hms(2012, 2, 2,13, 0, 0).unwrap(),
+            berlin().with_ymd_and_hms(2012, 2, 3,13, 0, 0).unwrap(),
         ])
     ]
 }),
@@ -135,8 +137,8 @@ mod test {
             ..Default::default()
         }),
         ContentLine::ExDate(vec![
-            BERLIN.with_ymd_and_hms(2012, 2, 2,13, 0, 0).unwrap(),
-            BERLIN.with_ymd_and_hms(2012, 2, 3,13, 0, 0).unwrap(),
+            berlin().with_ymd_and_hms(2012, 2, 2,13, 0, 0).unwrap(),
+            berlin().with_ymd_and_hms(2012, 2, 3,13, 0, 0).unwrap(),
         ]),
         ContentLine::ExRule(RRule {
             freq: Frequency::Weekly,

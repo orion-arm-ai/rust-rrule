@@ -100,7 +100,10 @@ mod parser;
 mod tests;
 mod validator;
 
-pub use crate::core::{Frequency, NWeekday, RRule, RRuleResult, RRuleSet, Tz};
+pub use crate::core::{
+    tzdb_version, Frequency, IanaOffset, IanaTz, NWeekday, RRule, RRuleResult, RRuleSet, Tz,
+    UnknownTimeZone,
+};
 pub use crate::core::{Unvalidated, Validated};
 pub use chrono::Weekday;
 pub use error::{ParseError, RRuleError, ValidationError};

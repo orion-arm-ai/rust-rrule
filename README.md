@@ -75,9 +75,9 @@ You should read the [security docs](https://github.com/fmeringdal/rust-rrule/blo
 All dates are limited to the range or years +/-262_000[^1] because of [Chrono][chrono] limits.
 See [Chrono's limits for more info](https://github.com/chronotope/chrono#limitations).
 
-Supported timezones are limited to by the timezones that [Chrono-Tz][chrono-tz] supports.
-This is equivalent to the IANA database.
-See [Chrono-Tz's limits for more info](https://github.com/chronotope/chrono-tz/#limiting-the-timezone-table-to-zones-of-interest).
+Supported timezones are the ones in the IANA Time Zone Database bundled by [jiff-tzdb][jiff-tzdb]
+(compiled into the binary; the operating system copy is never read).
+Run `cargo update -p jiff-tzdb` to pick up a newer tzdata release.
 
 ### Validation Limits
 
@@ -115,7 +115,7 @@ The code in this project is licensed under the [MIT](LICENSE-MIT) or [Apache 2.0
 All contributions to this project will be similarly licensed.
 
 [chrono]: https://github.com/chronotope/chrono
-[chrono-tz]: https://github.com/chronotope/chrono-tz/
+[jiff-tzdb]: https://crates.io/crates/jiff-tzdb
 [ical_spec]: https://icalendar.org/iCalendar-RFC-5545/3-3-10-recurrence-rule.html
 [dtstart_property]: https://icalendar.org/iCalendar-RFC-5545/3-8-2-4-date-time-start.html
 
